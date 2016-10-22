@@ -316,18 +316,77 @@ function local_response_normalization(input; depth_radius=5, bias=1.0, alpha=1.0
     with_op_name(name) do
         desc = NodeDescription("LRN")
         desc["depth_radius"] = Int64(depth_radius)
-        desc["bias"] = Float32(bias)
-        desc["alpha"] = Float32(alpha)
-        desc["beta"] = Float32(beta)
+        desc["bias"]         = Float32(bias)
+        desc["alpha"]        = Float32(alpha)
+        desc["beta"]         = Float32(beta)
         add_input(desc, input)
     end
     Tensor(Operation(desc))
 end
 
-@not_implemented function log_uniform_candidate_sampler()
+function fixed_unigram_candidate_sampler(true_classes, num_true, num_sampled, unique::Bool, range_max; vocab_file="", distortion=1., num_reserved_ids=0, num_shards=1, shard=0, unigrams=[], seed=0, seed2=0, name="FixedUnigramCandidateSampler")
+    local desc
+    with_op_name(name) do
+        desc = NodeDescription("FixedUnigramCandidateSampler")
+        add_input(desc, true_classes)
+        desc["num_true"]         = Int64(num_true)
+        desc["num_sampled"]      = Int64(num_sampled)
+        desc["unique"]           = unique
+        desc["range_max"]        = Int64(range_max)
+        desc["vocab_file"]       = vocab_file
+        desc["distortion"]       = Float32(distortion)
+        desc["num_reserved_ids"] = Int64(num_reserved_ids)
+        desc["num_shards"]       = Int64(num_shards)
+        desc["shard"]            = Int64(shard)
+        desc["unigrams"]         = unigrams
+        desc["seed"]             = Int64(seed)
+        desc["seed2"]            = Int64(seed2)
+    end
+    Tensor(Operation(desc))
 end
 
-@not_implemented function all_candidate_sampler()
+function learned_unigram_candidate_sampler(true_classes, num_true, num_sampled, unique::Bool, range_max; seed=0, seed2=0, name="LearnedUnigramCandidateSampler")
+    local desc
+    with_op_name(name) do
+        desc = NodeDescription("LearnedUnigramCandidateSampler")
+        add_input(desc, true_classes)
+        desc["num_true"]    = Int64(num_true)
+        desc["num_sampled"] = Int64(num_sampled)
+        desc["unique"]      = unique
+        desc["range_max"]   = Int64(range_max)
+        desc["seed"]        = Int64(seed)
+        desc["seed2"]       = Int64(seed2)
+    end
+    Tensor(Operation(desc))
+end
+
+function log_uniform_candidate_sampler(true_classes, num_true, num_sampled, unique::Bool, range_max; seed=0, seed2=0, name="LogUniformCandidateSampler")
+    local desc
+    with_op_name(name) do
+        desc = NodeDescription("LogUniformCandidateSampler")
+        add_input(desc, true_classes)
+        desc["num_true"]    = Int64(num_true)
+        desc["num_sampled"] = Int64(num_sampled)
+        desc["unique"]      = unique
+        desc["range_max"]   = Int64(range_max)
+        desc["seed"]        = Int64(seed)
+        desc["seed2"]       = Int64(seed2)
+    end
+    Tensor(Operation(desc))
+end
+
+function all_candidate_sampler(true_classes, num_true, num_sampled, unique::Bool; seed=0, seed2=0, name="AllCandidateSampler")
+    local desc
+    with_op_name(name) do
+        desc = NodeDescription("AllCandidateSampler")
+        add_input(desc, true_classes)
+        desc["num_true"]    = Int64(num_true)
+        desc["num_sampled"] = Int64(num_sampled)
+        desc["unique"]      = unique
+        desc["seed"]        = Int64(seed)
+        desc["seed2"]       = Int64(seed2)
+    end
+    Tensor(Operation(desc))
 end
 
 function atrous_conv2d(value, filters, rate, padding; name="AtrousConv2D")
@@ -358,7 +417,15 @@ end
 @not_implemented function batch_norm_with_global_normalization()
 end
 
-@not_implemented function bias_add()
+function bias_add(value, bias; data_format="NHWC", name="BiasAdd")
+    local desc
+    with_op_name(name) do
+        desc = NodeDescription("BiasAdd")
+        add_input(desc, Tensor(value))
+        add_input(desc, Tensor(bias))
+        desc["data_format"] = data_format
+    end
+    Tensor(Operation(desc), 1)
 end
 
 function conv1d(value, filters, strides, padding; data_format="NHWC", name="Conv1D")
@@ -422,9 +489,6 @@ function erosion2d(value, kernel, strides, rates, padding; name="Erosion2D")
         set_attr_list(desc, "strides", strides)
     end
     Tensor(Operation(desc), 1)
-end
-
-@not_implemented function fixed_unigram_candidate_sampler()
 end
 
 function l2_normalize(x, dim; epsilon=1e-12, name="L2Normalize")
