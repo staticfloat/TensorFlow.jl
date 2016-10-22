@@ -101,6 +101,18 @@ function dequeue_many(queue::AbstractQueue, n; name="QueueDequeueMany")
     [Tensor(op, i) for i in 1:length(queue.dtypes)]
 end
 
+function dequeue_up_to(queue::AbstractQueue, n; name="QueueDequeueUpTo")
+    local desc
+    with_op_name(name) do
+        desc = NodeDescription("QueueDequeueUpTo")
+        add_input(desc, queue.op)
+        add_input(desc, Tensor(Int32(n)))
+        set_attr_list(desc, "component_types", queue.dtypes)
+    end
+    op = Operation(desc)
+    [Tensor(op, i) for i in 1:length(queue.dtypes)]
+end
+
 function Base.size(queue::AbstractQueue; name="QueueSize")
     local desc
     with_op_name(name) do
