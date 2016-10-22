@@ -18,3 +18,6 @@ cond = [true; false; true; true; false]
 cond_tf = TensorFlow.constant(cond)
 result = run(sess, TensorFlow.select(cond_tf, a, b))
 @test [1; 7; 3; 4; 10] == result
+
+result = run(sess, ifelse(cond_tf))
+@test all(find(cond)-1 .== result)
