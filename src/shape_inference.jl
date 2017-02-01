@@ -240,7 +240,7 @@ register_shape("MatMul") do op
     if get_attr(op, "transpose_b", Bool)#op.attrs["transpose_b"].b
         reverse!(shape2.dims)
     end
-    return [TensorShape([shape1.dims[1], shape2.dims[2]])]
+    return [TensorShape([shape1.dims[1], get(shape2.dims,2,1)])]
 end
 
 for func in ["Sum", "Prod", "Min", "Max", "All", "Any", "Mean"]
