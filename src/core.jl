@@ -46,6 +46,9 @@ type Graph
 end
 
 function add_to_collection(g::Graph, name, node)
+    if !haskey(g.collections, name)
+        g.collections[name] = []
+    end
     push!(g.collections[name], node)
 end
 
@@ -53,7 +56,10 @@ end
 Returns a collection attached to the graph `g` named `name`
 """
 function get_collection(g::Graph, name)
-    g.collections[name]
+    if !haskey(g.collections, name)
+        return []
+    end
+   g.collections[name]
 end
 
 """
